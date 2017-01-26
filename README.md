@@ -9,9 +9,9 @@ Thrift-API предназначено для получения квантовы
 С точки зрения потребителя квантового ключа QKD на каждой стороне представляет собой сервер, предоставляющий API для получения квантовых ключей.
 Потребители квантового ключа являются клиентами.
 
-На каждой стороне QKD производит генерацию, накопление и выдачу квантового ключа потребителям. Для потребителя устройство на каждой стороне предоставляет интерфейс для получения квантового ключа. Взаимодействие потребителя с квантовым устройством осуществляется посредтвом сети Ethernet. Для аутентификации пользователей и защиты канала связи используется протокол SSL(TLSv1.2). Для предоставления квантовых ключей используется [RPC-фреймворк Apache Thrift][1].
+На каждой стороне QKD производит генерацию, накопление и выдачу квантового ключа потребителям. Для потребителя устройство на каждой стороне предоставляет интерфейс для получения квантового ключа. Взаимодействие потребителя с квантовым устройством осуществляется посредством сети Ethernet. Для аутентификации пользователей и защиты канала связи используется протокол SSL(TLSv1.2). Для предоставления квантовых ключей используется [RPC-фреймворк Apache Thrift][1].
 
-Описание клиетского протокола представлено в файле [doc/client_api.pdf](doc/client_api.pdf). Пример клиентского приложения на языке `Python` представлен в папке [doc/example][2].
+Описание клиентского протокола представлено в файле [doc/client_api.pdf](doc/client_api.pdf). Пример клиентского приложения на языке `Python` представлен в папке [doc/example][2].
 
 ## Требования
 
@@ -22,7 +22,7 @@ Thrift-API предназначено для получения квантовы
 
 ## Быстрый старт
 
-Для создания собственных клиентских приложений необходимо сгенерировать реализацию клиентского протокола для используемого языка програмирования. Например, для `Python` необходимо выполнить команду:
+Для создания собственных клиентских приложений необходимо сгенерировать реализацию клиентского протокола для используемого языка программирования. Например, для `Python` необходимо выполнить команду:
 
 ```
 thrift -out . -gen py:new_style,slots,utf8strings,coding=utf8 client_api.thrift
@@ -53,7 +53,7 @@ client_tx = Client(TBinaryProtocol(transp_tx))
 transp_tx.open()
 ```
 
-После этого объект клиента можно использовать для вызова фукций получения ключа, например:
+После этого объект клиента можно использовать для вызова функций получения ключа, например:
 
 ```Python
 key = client_tx.get_by_length(size)
@@ -66,14 +66,14 @@ key = client_tx.get_by_id(key_id)
 
 ## Тестовый клиент
 
-В папке [example/api-clent-py](example/api-clent-py) представлен пример клиентского приложения на `Python`. Клиент содержит примеры получения квантовых ключей по длине и по идентификатору, а так же примеры ошибочных запросов.
+В папке [example/api-client-py][3] представлен пример клиентского приложения на `Python`. Клиент содержит примеры получения квантовых ключей по длине и по идентификатору, а так же примеры ошибочных запросов.
 
 Для работы тестового клиента с реальными квантовыми устройствами или их эмуляторами необходимо, чтобы в папке `api-client-py/ssl/` располагались файлы:
 - `pair_ca_bundle.crt` - сертификат удостоверяющего центра, используемый для проверки подлинности сервера
 - `tx_client.crt` и `tx_client.key` - клиентский сертификат и закрытый ключ используемый для аутентификации на сервере квантового устройства на стороне ПРД
 - `rx_client.crt` и `rx_client.key` - клиентский сертификат и закрытый ключ используемый для аутентификации на сервере квантового устройства на стороне ПРМ
 
-Эти файлы предоставляются с комплектом программного обеспечия, входящего в поставку QKD, или поставляются вместе с эмулятором.
+Эти файлы предоставляются с комплектом программного обеспечения, входящего в поставку QKD, или поставляются вместе с эмулятором.
 
 ## Эмулятор QKD
 
@@ -91,7 +91,7 @@ QKD consists of two paired devices, both generating the same random sequence, ca
 
 Client protocol description can be found in [doc/client_api.pdf](doc/client_api.pdf). Sample python-based api client can be found in [doc/example][2] directory.
 
-## Requrements
+## Requirements
 
 Following usual steps needed to write QKD api client:
 - [Apache Thrift][1], it used to generate client-side protocol implementation for used programming language and as generated code dependency
@@ -107,7 +107,7 @@ thrift -out . -gen py:new_style,slots,utf8strings,coding=utf8 client_api.thrift
 
 For detailed instructions about code generation from Thrift-files see [official docs][1]).
 
-After this, you need to write client code using generated protocol implementation. Client must server connection routine. Following Python code implements simple connection with SSL channel and x509 certificate authontication:
+After this, you need to write client code using generated protocol implementation. Client must server connection routine. Following Python code implements simple connection with SSL channel and x509 certificate authentication:
 
 ```Python
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
@@ -142,7 +142,7 @@ key = client_tx.get_by_id(key_id)
 
 ## Sample test client
 
-Simple Python-based client application present in [example/api-clent-py](example/api-clent-py) directory. This app contains code for requesting new key by length, requesting existing key by it's QID and handling possible errors.
+Simple Python-based client application present in [example/api-client-py][3] directory. This app contains code for requesting new key by length, requesting existing key by it's QID and handling possible errors.
 
 To interact with real or emulated QKD API server, following ssl-related files must be placed in `api-client-py/ssl/` directory:
 - `pair_ca_bundle.crt` - Certificate Authority (root or intermediate) certificate. Used to authorize api server.
@@ -155,5 +155,7 @@ This files are included in QKD software bundle (package). Also this files can be
 
 We can provide QKD server emulation bundle for developers, interested in writing client applications for QKD device. Email us: <akf@rqc.ru> (Alexey Fedorov) or <npozhar@rqc.ru> (Nikolay Pozhar).
 
+
 [1]: https://thrift.apache.org/
 [2]: https://github.com/RQC-QKD-Software/QRate-Client-API/tree/master/example
+[3]: https://github.com/RQC-QKD-Software/QRate-Client-API/tree/master/example/api-client-py
