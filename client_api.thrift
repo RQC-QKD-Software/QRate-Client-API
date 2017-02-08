@@ -1,7 +1,45 @@
 /**
- * <br/><b><i>Thrift-api для получения квантовых ключей.</b></i><br/></br>
+ * <br/><b><i>Quantum key distribution Thrift API.</b></i><br/></br>
  *
- * <i>For english version see below.</i></br></br>
+ * <i>Русская версия представлена ниже.</i></br></br>
+ *
+ * Quantum key API of device consists of two functions: get new quantum key and
+ * it's unique QID from device by length and get existing (already requested on
+ * paired device) key by it's QID.</br></br>
+ *
+ * <b>Quantum key use routine.</b></br>
+ *
+ * QKD pair consists of two paired devices. We'll call one side as "A" and other
+ * one as "B".</br>
+ * 1. <i>Side "A"</i></br>
+ *   a. Key consumer on side "A" requests new quantum key from device
+ *      (on side A) providing length of new key.</br>
+ *   b. Device on side "A" responds with new quantum key and corresponding QID
+ *      for this key.</br>
+ * 2. <i>Transmission from side "A" to side "B"</i></br>
+ *   a. Key consumer on side "A" sends QID to key consumer on side "B".</br>
+ * 3. <i>Side "B"</i></br>
+ *   a. Key consumer on side "B" requests existing quantum key from device (on
+ *      side B) providing QID received from side "A".</br>
+ *   b. Device on side "B" responds with same quantum key as device on side "A"
+ *      (for given QID).</br></br>
+ *
+ * Device behaviour on side "A" and side "B" is absolutely same for key
+ * consumers.</br></br>
+ *
+ * API server needs SSL (TLSv1.2) socket to be used for client connections.
+ * Client must provide X509 certificate for authentication.<br/><br/>
+ *
+ * Binary serialization protocol is used for Thrift cobnnections.<br/><br/>
+ *
+ * API versioning implemented by thrift's namespaces.
+ * Backward-compatible API versions use the same namespaces.<br/>
+ *
+ *
+ * <br/></br>------------------<br/></br>
+ *
+ *
+ * <br/><b><i>Thrift-api для получения квантовых ключей.</b></i><br/></br>
  *
  * API включает в себя две функции для получения квантовых ключей от API-сервера
  * (квантового устройства): получение по длине и получение по идентификатору
@@ -37,42 +75,6 @@
  * Версионирование при сохранении обратной совместимости не требуется
  * (добавление полей и т.д.). Несовместимые версии API используют другой
  * namespace (или его аналог в целевом языке).<br/>
- *
- * <br/></br>------------------<br/></br>
- *
- * <br/><b><i>Quantum key distribution Thrift API.</b></i><br/></br>
- *
- * Quantum key API of device consists of two functions: get new quantum key and
- * it's unique QID from device by length and get existing (already requested on
- * paired device) key by it's QID.</br></br>
- *
- * <b>Quantum key use routine.</b></br>
- *
- * QKD pair consists of two paired devices. We'll call one side as "A" and other
- * one as "B".</br>
- * 1. <i>Side "A"</i></br>
- *   a. Key consumer on side "A" requests new quantum key from device
- *      (on side A) providing length of new key.</br>
- *   b. Device on side "A" responds with new quantum key and corresponding QID
- *      for this key.</br>
- * 2. <i>Transmission from side "A" to side "B"</i></br>
- *   a. Key consumer on side "A" sends QID to key consumer on side "B".</br>
- * 3. <i>Side "B"</i></br>
- *   a. Key consumer on side "B" requests existing quantum key from device (on
- *      side B) providing QID received from side "A".</br>
- *   b. Device on side "B" responds with same quantum key as device on side "A"
- *      (for given QID).</br></br>
- *
- * Device behaviour on side "A" and side "B" is absolutely same for key
- * consumers.</br></br>
- *
- * API server needs SSL (TLSv1.2) socket to be used for client connections.
- * Client must provide X509 certificate for authentication.<br/><br/>
- *
- * Binary serialization protocol is used for Thrift cobnnections.<br/><br/>
- *
- * API versioning implemented by thrift's namespaces.
- * Backward-compatible API versions use the same namespaces.<br/>
  */
 
 namespace cpp  qkd_client_api.v1
@@ -84,142 +86,142 @@ namespace py   qkd_client_api.v1
 
 
 /**
+ * Key data structure. Returned for all key requests.
  * Структура информации о ключе, возвращается при всех запросах на получение
  * ключа.
- * Key data structure. Returned for all key requests.
  */
 struct KeyInfo
 {
     /**
+     * Key body, always present.
      * Тело ключа, возвращается всегда.
-     * Key body, always present
      */
     1: binary key_body,
 
     /**
+     * Key identifier, filled on get_by_length() calls.
+     * Must be used for calling get_by_id() on paired device.
      * Идентификатор ключа, возвращается при вызове get_by_length().
      * Используется для последующего получения этого ключа на принимающей
      * стороне.
-     * Key identifier, filled on get_by_length() calls.
-     * Must be used for calling get_by_id() on paired device.
      */
     2: binary key_id,
 
     /**
-     * Время действия ключа, возвращается при вызове get_by_length().
-     * Представлено как UNIX timestamp в миллисекундах в зоне UTC+0.
      * Key lifetime, filled on get_by_length() calls.
      * UNIX timestamp in millis, UTC+0 timezone.
+     * Время действия ключа, возвращается при вызове get_by_length().
+     * Представлено как UNIX timestamp в миллисекундах в зоне UTC+0.
      */
     3: i64 expiration_time
 }
 
 
 /**
- * Коды серверных ошибок (ServerError).
  * Server side error codes (ServerError).
+ * Коды серверных ошибок (ServerError).
  */
 enum SERVER_ERROR_CODE
 {
     /**
-     * Сервер занят или перегружен, необходимо повторить запрос позднее.
      * Server busy or overloaded. Retry later.
+     * Сервер занят или перегружен, необходимо повторить запрос позднее.
      */
     ERROR_BUSY = -1,
 
     /**
+     * Insufficient key data on server for processing key request. Retry later.
      * Недостаточно накопленного ключа на сервере, необходимо повторить запрос
      * позднее.
-     * Insufficient key data on server for processing key request. Retry later.
      */
     ERROR_KEY_EXHAUSTED = -2,
 
     /**
-     * Внутренняя ошибка сервера.
      * Internal server error.
+     * Внутренняя ошибка сервера.
      */
     ERROR_INTERNAL = -99
 }
 
 
 /**
- * Коды клиентских ошибок (ClientError).
  * Client side error codes (ClientError).
+ * Коды клиентских ошибок (ClientError).
  */
 enum CLIENT_ERROR_CODE
 {
     /**
+     * Wrong QID provided (non-existent, already used or expired).
      * Указан неверный идентификатор ключа (несуществующий, использованный или
      * истёкший).
-     * Wrong QID provided (non-existent, already used or expired).
      */
     ERROR_KEY_UNKNOWN = -101,
 
     /**
-     * Указано недопустимое значение параметра.
      * Invalid parameter value (usually key length).
+     * Указано недопустимое значение параметра.
      */
     ERROR_INVALID_ARGUMENT = -102
 }
 
 
 /**
- * Ошибка на стороне сервера, клиент не может на неё повлиять.
- * Можно подождать retry_after секунд и повторить запрос.
  * Server side error, can't be fixed by client.
  * Client must wait for retry_after seconds and retry the same request.
+ * Ошибка на стороне сервера, клиент не может на неё повлиять.
+ * Можно подождать retry_after секунд и повторить запрос.
  */
 exception ServerError
 {
     /**
-     * Код ошибки.
      * Error code.
+     * Код ошибки.
      */
     1: i32    error_code,
 
     /**
-     * Время, через которое можно повторить запрос.
      * Time amount before retrying request.
+     * Время, через которое можно повторить запрос.
      */
     2: double retry_after,
 
     /**
-     * Текстовое описание ошибки.
      * Error description.
+     * Текстовое описание ошибки.
      */
     3: string message
 }
 
 
 /**
- * Ошибка на стороне клиента. Повторный запрос приведет к этой же ошибке.
  * Client side error (wrong request). Retrying with same request will cause
  * same error.
+ * Ошибка на стороне клиента. Повторный запрос приведет к этой же ошибке.
  */
 exception ClientError
 {
     /**
-     * Код ошибки.
      * Error code.
+     * Код ошибки.
      */
     1: i32    error_code,
 
     /**
-     * Текстовое описание ошибки.
      * Error description.
+     * Текстовое описание ошибки.
      */
     2: string message
 }
 
 service ClientApiService {
     /**
-     * Получить новый ключ указанной длины и его идентификатор.
      * Get new key and it's QID for given key length.
+     * Получить новый ключ указанной длины и его идентификатор.
      */
     KeyInfo get_by_length(
         /**
-         * длина запрашиваемого ключа в байтах
-         * key length in bytes
+         * Key length in bytes.
+         * Длина запрашиваемого ключа в байтах.
          */
         1: i32 key_length
     ) throws (
@@ -228,15 +230,15 @@ service ClientApiService {
     ),
 
     /**
-     * Получить существующий ключ по его идентификатору.
      * Get existing key by it's QID.
+     * Получить существующий ключ по его идентификатору.
      */
     KeyInfo get_by_id(
         /**
-         * идентификатор ключа (квид), указанный в структуре KeyInfo при
-         * получении.
          * Key identifier (QID). Value determined in KeyInfo structure, returned
          * for get_by_length() request.
+         * Идентификатор ключа (квид), указанный в структуре KeyInfo при
+         * получении.
          */
         1: binary key_id
     ) throws (

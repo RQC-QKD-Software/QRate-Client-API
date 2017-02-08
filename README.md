@@ -1,6 +1,84 @@
-# Thrift-API для получения квантовых ключей
+# Quantum key distribution (QKD) Thrift API
 
-*For english version see below*
+*Русская версия представлена ниже*
+
+This repository contains QKD device client API description with sample Python client.
+
+QKD implements API server, that stores generated quantum key and serves it to clients. Clients are quantum key consumers (at least one consumer on each side).
+
+QKD consists of two paired devices, both generating the same random sequence, called quantum key. Both devices has the same QKD client API. Device-client channel uses Ethernet connection. SSL (TLSv1.2) is used for client authentication and data protection (channel encryption). QKD client API is based on [Apache Thrift RPC-framework][1].
+
+Client protocol description can be found in [doc/client_api.pdf](doc/client_api.pdf). Sample python-based api client can be found in [doc/example][2] directory.
+
+## Requirements
+
+Following usual steps needed to write QKD API client:
+- [Apache Thrift][1], it used to generate client-side protocol implementation for used programming language and as generated code dependency
+- Use SSL(TLSv1.2) implementation (e.g. [OpenSSL](https://www.openssl.org/)) to establish secure connection to device.
+- Generate client-side protocol implementation from Thrift API specification file [client.thrift](client.thrift) (see official docs for further instructions [link][1])
+
+## Quick Start
+
+To implement your own QKD client application (key consumer), you need to generate client-side protocol implementation for used programming language. For example, if your language is python, use following command:
+```
+thrift -out . -gen py:new_style,slots,utf8strings,coding=utf8 client_api.thrift
+```
+
+For detailed instructions about code generation from Thrift-files see [official docs][1]).
+
+After this, you need to write client code using generated protocol implementation. Client must implement server connection routine. Following Python code implements simple connection with SSL channel and x509 certificate authentication:
+
+```Python
+from thrift.protocol.TBinaryProtocol import TBinaryProtocol
+from thrift.transport.TSSLSocket import TSSLSocket
+from thrift.transport.TTransport import TBufferedTransport
+
+from qkd_client_api.v1.QkdApiService import Client
+from qkd_client_api.v1 import ttypes
+
+transp_tx = TBufferedTransport(TSSLSocket(api_host,
+                                          api_port,
+                                          validate=False,
+                                          certfile='ssl/tx_client.crt',
+                                          keyfile='ssl/tx_client.key',
+                                          ca_certs='ssl/pair_ca_bundle.crt'))
+
+client_tx = Client(TBinaryProtocol(transp_tx))
+
+transp_tx.open()
+```
+
+When connection is established, client object can be used to perform API requests. For example, to get new key of 'size' bytes, perform following call:
+
+```Python
+key = client_tx.get_by_length(size)
+```
+to get existing key by QID:
+
+```Python
+key = client_tx.get_by_id(key_id)
+```
+
+## Sample test client
+
+Simple Python-based client application present in [example/api-client-py][3] directory. This app contains code for requesting new key by length, requesting existing key by it's QID and handling possible errors.
+
+To interact with real or emulated QKD API server, following ssl-related files must be placed in `api-client-py/ssl/` directory:
+- `pair_ca_bundle.crt` - Certificate Authority (root or intermediate) certificate. Used to authorize API server.
+- `tx_client.crt` и `tx_client.key` - client x509 certificate and private key. Used to establish connections to TX side QKD server.
+- `rx_client.crt` и `rx_client.key` - client x509 certificate and private key. Used to establish connections to RX side QKD server.
+
+These files are included in QKD software bundle (package). Also these files can be found in QKD server emulator bundle.
+
+## QKD emulator
+
+We can provide QKD server emulation bundle for developers, interested in writing client applications for QKD device. Email us: <akf@rqc.ru> (Alexey Fedorov) or <npozhar@rqc.ru> (Nikolay Pozhar).
+
+
+--------------
+
+
+# Thrift-API для получения квантовых ключей
 
 Thrift-API предназначено для получения квантовых ключей от устройства квантового распределения ключа *QKD*. QKD предназначено для выработки симметричных квантовых ключей на двух сторонах обмена. Эти стороны мы будем называть *Alice (A)/Передатчик (ПРД/tx)* и *Bob (B)/Приемник (ПРМ/rx)*.
 
@@ -78,83 +156,6 @@ key = client_tx.get_by_id(key_id)
 ## Эмулятор QKD
 
 Если вы заинтересованы в написании клиентских приложений для устройства квантового распределения ключа и хотели бы получить эмулятор QKD, напишите письмо на адрес <akf@rqc.ru> (Алексей Федоров) или <npozhar@rqc.ru> (Николай Пожар).
-
---------------
-
-# Quantum key distribution (QKD) Thrift API
-
-This repository contains QKD device client API description with sample Python client.
-
-QKD implements API server, that stores generated quantum key and serves it to clients. Clients are quantum key consumers (usually pair - one consumer on each side).
-
-QKD consists of two paired devices, both generating the same random sequence, called quantum key. Both devices has the same QKD client API. Device-client channel uses Ethernet connection. SSL (TLSv1.2) is used for client authentication and data protection (channel encryption). QKD client API is based on [Apache Thrift RPC-framework][1].
-
-Client protocol description can be found in [doc/client_api.pdf](doc/client_api.pdf). Sample python-based api client can be found in [doc/example][2] directory.
-
-## Requirements
-
-Following usual steps needed to write QKD api client:
-- [Apache Thrift][1], it used to generate client-side protocol implementation for used programming language and as generated code dependency
-- Use SSL(TLSv1.2) implementation (e.g. [OpenSSL](https://www.openssl.org/)) to establish secure connection to device.
-- Generate client-side protocol implementation from Thrift api specification file [client.thrift](client.thrift) (see official docs for further instructions [link][1])
-
-## Quick Start
-
-To implement your own qkd client application (key consumer), you need to generate client-side protocol implementation for used programming language. For example, if your language is python, use following command:
-```
-thrift -out . -gen py:new_style,slots,utf8strings,coding=utf8 client_api.thrift
-```
-
-For detailed instructions about code generation from Thrift-files see [official docs][1]).
-
-After this, you need to write client code using generated protocol implementation. Client must server connection routine. Following Python code implements simple connection with SSL channel and x509 certificate authentication:
-
-```Python
-from thrift.protocol.TBinaryProtocol import TBinaryProtocol
-from thrift.transport.TSSLSocket import TSSLSocket
-from thrift.transport.TTransport import TBufferedTransport
-
-from qkd_client_api.v1.QkdApiService import Client
-from qkd_client_api.v1 import ttypes
-
-transp_tx = TBufferedTransport(TSSLSocket(api_host,
-                                          api_port,
-                                          validate=False,
-                                          certfile='ssl/tx_client.crt',
-                                          keyfile='ssl/tx_client.key',
-                                          ca_certs='ssl/pair_ca_bundle.crt'))
-
-client_tx = Client(TBinaryProtocol(transp_tx))
-
-transp_tx.open()
-```
-
-When connection established, client object can be used to perform API requests. For example, to get new key of 'size' bytes, perform following call:
-
-```Python
-key = client_tx.get_by_length(size)
-```
-to get existing key by QID:
-
-```Python
-key = client_tx.get_by_id(key_id)
-```
-
-## Sample test client
-
-Simple Python-based client application present in [example/api-client-py][3] directory. This app contains code for requesting new key by length, requesting existing key by it's QID and handling possible errors.
-
-To interact with real or emulated QKD API server, following ssl-related files must be placed in `api-client-py/ssl/` directory:
-- `pair_ca_bundle.crt` - Certificate Authority (root or intermediate) certificate. Used to authorize api server.
-- `tx_client.crt` и `tx_client.key` - client x509 certificate and private key. Used to establish connections to TX side QKD server.
-- `rx_client.crt` и `rx_client.key` - client x509 certificate and private key. Used to establish connections to RX side QKD server.
-
-This files are included in QKD software bundle (package). Also this files can be found in QKD server emulator bundle.
-
-## QKD emulator
-
-We can provide QKD server emulation bundle for developers, interested in writing client applications for QKD device. Email us: <akf@rqc.ru> (Alexey Fedorov) or <npozhar@rqc.ru> (Nikolay Pozhar).
-
 
 [1]: https://thrift.apache.org/
 [2]: https://github.com/RQC-QKD-Software/QRate-Client-API/tree/master/example
