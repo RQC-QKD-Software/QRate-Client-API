@@ -8,20 +8,20 @@ QKD implements API server, that stores generated quantum key and serves it to cl
 
 QKD consists of two paired devices, both generating the same random sequence, called quantum key. Both devices has the same QKD client API. Device-client channel uses Ethernet connection. SSL (TLSv1.2) is used for client authentication and data protection (channel encryption). QKD client API is based on [Apache Thrift RPC-framework][1].
 
-Client protocol description can be found in [doc/client_api.pdf](doc/client_api.pdf). Sample python-based api client can be found in [doc/example][2] directory.
+Client protocol description can be found in [doc/client_api.pdf](doc/client_api.pdf). Sample python-based API client can be found in [doc/example][2] directory.
 
 ## Requirements
 
 Following usual steps needed to write QKD API client:
-- [Apache Thrift][1], it used to generate client-side protocol implementation for used programming language and as generated code dependency
-- Use SSL(TLSv1.2) implementation (e.g. [OpenSSL](https://www.openssl.org/)) to establish secure connection to device.
-- Generate client-side protocol implementation from Thrift API specification file [client.thrift](client.thrift) (see official docs for further instructions [link][1])
+- [Apache Thrift][1] client library for used programming language (version 0.10.0 and higher)
+- Use SSL(TLSv1.2) implementation (e.g. [OpenSSL](https://www.openssl.org/) 1.0.2 and higher) to establish secure connection to device
+- Generate client-side protocol implementation from Thrift API specification file [client.thrift](client.thrift) using generator of version 0.9.3 or higher (see official docs for further instructions [link][1])
 
 ## Quick Start
 
 To implement your own QKD client application (key consumer), you need to generate client-side protocol implementation for used programming language. For example, if your language is python, use following command:
 ```
-thrift -out . -gen py:new_style,slots,utf8strings,coding=utf8 client_api.thrift
+thrift -out . -gen py:new_style,slots,no_utf8strings,coding=utf8 client_api.thrift
 ```
 
 For detailed instructions about code generation from Thrift-files see [official docs][1]).
@@ -70,6 +70,23 @@ To interact with real or emulated QKD API server, following ssl-related files mu
 
 These files are included in QKD software bundle (package). Also these files can be found in QKD server emulator bundle.
 
+## Known issues
+
+### Protocol error TLSv1.2 on connection
+
+There are two reasons for this error:
+- Python Thrift client library of version 0.9.3
+
+    Solution: update Python Thrift client library to version 0.10.0 or higher
+
+- Old OpenSSL library version without TLSv1.2 support
+
+    Solution: update OpenSSL library to version 1.0.2 or higher
+
+### Python unicode decode error
+
+Error occurs if wrong options were provided during Thrift code generation. Make sure you **don't** use option `utf8strings` with generator of version 0.9.3. Make sure you provide option `no_utf8strings` with generator of version 0.10.0.
+
 ## QKD emulator
 
 We can provide QKD server emulation bundle for developers, interested in writing client applications for QKD device. Email us: <akf@rqc.ru> (Alexey Fedorov) or <npozhar@rqc.ru> (Nikolay Pozhar).
@@ -94,16 +111,16 @@ Thrift-API предназначено для получения квантовы
 ## Требования
 
 Для создания собственных клиентских приложений для QKD необходимо:
-- Установить [Apache Thrift][1] для генерации реализаций клиентского протокола на используемом языке программирования
-- Использовать реализацию SSL(TLSv1.2) для подключения к квантовому устройству (например, [OpenSSL](https://www.openssl.org/))
-- Сгенерировать реализацию клиентского протокола из файла с Thrift-описанием [client.thrift](client.thrift) (подробнее про генерацию кода из файлов описаний можно прочитать по [ссылке][1])
+- Установить библиотеки [Apache Thrift][1] не ниже версии 0.10.0 для используемого языка программирования
+- Использовать реализацию SSL(TLSv1.2) для подключения к квантовому устройству (например, [OpenSSL](https://www.openssl.org/) начиная с версии 1.0.2)
+- Сгенерировать реализацию клиентского протокола из файла с Thrift-описанием [client.thrift](client.thrift), используя генератор версии не ниже 0.9.3 (подробнее про генерацию кода из файлов описаний можно прочитать по [ссылке][1])
 
 ## Быстрый старт
 
 Для создания собственных клиентских приложений необходимо сгенерировать реализацию клиентского протокола для используемого языка программирования. Например, для `Python` необходимо выполнить команду:
 
 ```
-thrift -out . -gen py:new_style,slots,utf8strings,coding=utf8 client_api.thrift
+thrift -out . -gen py:new_style,slots,no_utf8strings,coding=utf8 client_api.thrift
 ```
 
 Подробнее про генерацию кода их файлов описаний можно прочитать по [ссылке][1].
@@ -152,6 +169,23 @@ key = client_tx.get_by_id(key_id)
 - `rx_client.crt` и `rx_client.key` - клиентский сертификат и закрытый ключ используемый для аутентификации на сервере квантового устройства на стороне ПРМ
 
 Эти файлы предоставляются с комплектом программного обеспечения, входящего в поставку QKD, или поставляются вместе с эмулятором.
+
+## Известные проблемы
+
+### Ошибка TLSv1.2 при подключении к серверу
+
+Эта ошибка может возникать по двум причинам:
+- При использовании клиентской Python-библиотеки Thrift версии 0.9.3
+
+    В этом случае необходимо обновить клиентскую библиотеку Thrift до версии 0.10.0 или выше
+
+- При использовании старых версии OpenSSL, которые не поддерживают TLSv1.2
+
+    В этом случае необходимо обновить OpenSSL до версии 1.0.2 или выше
+
+### Ошибка декодирования UTF-8 при использовании Python-клиента
+
+Эта ошибка может возникать из-за неправильно сгенерированного клиентского кода по Thrift-описанию. При использовании генератора версии 0.9.3, убедитесь, что Вы **не** указывали опцию `utf8strings`. При использовании генератора версии 0.10.0, убедитесь, что Вы указали опцию `no_utf8strings`.
 
 ## Эмулятор QKD
 

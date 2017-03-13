@@ -4,7 +4,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:new_style,slots,utf8strings,coding=utf8
+#  options string: py:new_style,slots,no_utf8strings,coding=utf8
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
@@ -409,7 +409,7 @@ class get_by_id_args(object):
         break
       if fid == 1:
         if ftype == TType.STRING:
-          self.key_id = iprot.readString().decode('utf-8')
+          self.key_id = iprot.readString()
         else:
           iprot.skip(ftype)
       else:
@@ -424,7 +424,7 @@ class get_by_id_args(object):
     oprot.writeStructBegin('get_by_id_args')
     if self.key_id is not None:
       oprot.writeFieldBegin('key_id', TType.STRING, 1)
-      oprot.writeString(self.key_id.encode('utf-8'))
+      oprot.writeString(self.key_id)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

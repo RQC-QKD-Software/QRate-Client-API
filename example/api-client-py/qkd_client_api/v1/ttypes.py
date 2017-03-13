@@ -4,7 +4,7 @@
 #
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #
-#  options string: py:new_style,slots,utf8strings,coding=utf8
+#  options string: py:new_style,slots,no_utf8strings,coding=utf8
 #
 
 from thrift.Thrift import TType, TMessageType, TException, TApplicationException
@@ -214,7 +214,7 @@ class QkdServerError(TException):
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRING:
-          self.message = iprot.readString().decode('utf-8')
+          self.message = iprot.readString()
         else:
           iprot.skip(ftype)
       else:
@@ -237,7 +237,7 @@ class QkdServerError(TException):
       oprot.writeFieldEnd()
     if self.message is not None:
       oprot.writeFieldBegin('message', TType.STRING, 3)
-      oprot.writeString(self.message.encode('utf-8'))
+      oprot.writeString(self.message)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -316,7 +316,7 @@ class QkdClientError(TException):
           iprot.skip(ftype)
       elif fid == 2:
         if ftype == TType.STRING:
-          self.message = iprot.readString().decode('utf-8')
+          self.message = iprot.readString()
         else:
           iprot.skip(ftype)
       else:
@@ -335,7 +335,7 @@ class QkdClientError(TException):
       oprot.writeFieldEnd()
     if self.message is not None:
       oprot.writeFieldBegin('message', TType.STRING, 2)
-      oprot.writeString(self.message.encode('utf-8'))
+      oprot.writeString(self.message)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
