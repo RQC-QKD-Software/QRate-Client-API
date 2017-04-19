@@ -99,9 +99,9 @@ struct KeyInfo
     1: binary key_body,
 
     /**
-     * Key identifier, filled on get_by_length() calls.
+     * Key identifier, filled on get_by_length() calls, 16 bytes
      * Must be used for calling get_by_id() on paired device.
-     * Идентификатор ключа, возвращается при вызове get_by_length().
+     * Идентификатор ключа, возвращается при вызове get_by_length(), 16 байт
      * Используется для последующего получения этого ключа на принимающей
      * стороне.
      */
@@ -235,10 +235,10 @@ service ClientApiService {
      */
     KeyInfo get_by_id(
         /**
-         * Key identifier (QID). Value determined in KeyInfo structure, returned
-         * for get_by_length() request.
-         * Идентификатор ключа (квид), указанный в структуре KeyInfo при
-         * получении.
+         * Key identifier (QID, 16 bytes). Value determined in KeyInfo
+         * structure, returned for get_by_length() request.
+         * Идентификатор ключа (квид, 16 байт), указанный в структуре KeyInfo
+         * при получении.
          */
         1: binary key_id
     ) throws (
