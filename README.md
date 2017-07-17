@@ -89,7 +89,7 @@ Error occurs if wrong options were provided during Thrift code generation. Make 
 
 ## QKD emulator
 
-We can provide QKD server emulation bundle for developers, interested in writing client applications for QKD device. Email us: <akf@rqc.ru> (Alexey Fedorov) or <npozhar@rqc.ru> (Nikolay Pozhar).
+We can provide QKD server emulation bundle for developers, interested in writing client applications for QKD device. Email us: <akf@rqc.ru> (Alexey Fedorov) or <n.pozhar@rqc.ru> (Nikolay Pozhar).
 
 
 --------------
@@ -189,7 +189,7 @@ key = client_tx.get_by_id(key_id)
 
 ## Эмулятор QKD
 
-Если вы заинтересованы в написании клиентских приложений для устройства квантового распределения ключа и хотели бы получить эмулятор QKD, напишите письмо на адрес <akf@rqc.ru> (Алексей Федоров) или <npozhar@rqc.ru> (Николай Пожар).
+Если вы заинтересованы в написании клиентских приложений для устройства квантового распределения ключа и хотели бы получить эмулятор QKD, напишите письмо на адрес <akf@rqc.ru> (Алексей Федоров) или <n.pozhar@rqc.ru> (Николай Пожар).
 
 [1]: https://thrift.apache.org/
 [2]: https://github.com/RQC-QKD-Software/QRate-Client-API/tree/master/example
