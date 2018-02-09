@@ -323,9 +323,9 @@ Invalid parameter value (usually key length).
 <tr><td>1</td><td>key_body</td><td><code>binary</code></td><td>Key body, always present.
 Тело ключа, возвращается всегда.
 </td><td>default</td><td></td></tr>
-<tr><td>2</td><td>key_id</td><td><code>binary</code></td><td>Key identifier, filled on get_by_length() calls, 16 bytes
+<tr><td>2</td><td>key_id</td><td><code>binary</code></td><td>Key identifier, filled on get_by_length() calls, 16 bytes.
 Must be used for calling get_by_id() on paired device.
-Идентификатор ключа, возвращается при вызове get_by_length(), 16 байт
+Идентификатор ключа, возвращается при вызове get_by_length(), 16 байт.
 Используется для последующего получения этого ключа на принимающей
 стороне.
 </td><td>default</td><td></td></tr>
@@ -342,8 +342,14 @@ UNIX timestamp in millis, UTC+0 timezone.
 <tr><td>1</td><td>error_code</td><td><code>i32</code></td><td>Error code.
 Код ошибки.
 </td><td>default</td><td></td></tr>
-<tr><td>2</td><td>retry_after</td><td><code>double</code></td><td>Time amount before retrying request.
-Время, через которое можно повторить запрос.
+<tr><td>2</td><td>retry_after</td><td><code>double</code></td><td>Time amount before retrying request. This field is always approximate
+and does not guarantee the presence of a key. It can take values
+from 1.0 to 300.0. QKD clients can ignore this value and always execute
+queries with a fixed delay.
+Время, через которое можно повторить запрос. Это поле всегда имеет
+приблизительное значение и не гарантирует наличие ключа. Может принимать
+значения от 1.0 до 300.0. Клиенты QKD могут игнорировать это значение и
+всегда выполнять запросы с фиксированной задержкой.
 </td><td>default</td><td></td></tr>
 <tr><td>3</td><td>message</td><td><code>string</code></td><td>Error description.
 Текстовое описание ошибки.

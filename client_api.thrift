@@ -99,9 +99,9 @@ struct KeyInfo
     1: binary key_body,
 
     /**
-     * Key identifier, filled on get_by_length() calls, 16 bytes
+     * Key identifier, filled on get_by_length() calls, 16 bytes.
      * Must be used for calling get_by_id() on paired device.
-     * Идентификатор ключа, возвращается при вызове get_by_length(), 16 байт
+     * Идентификатор ключа, возвращается при вызове get_by_length(), 16 байт.
      * Используется для последующего получения этого ключа на принимающей
      * стороне.
      */
@@ -180,8 +180,14 @@ exception ServerError
     1: i32    error_code,
 
     /**
-     * Time amount before retrying request.
-     * Время, через которое можно повторить запрос.
+     * Time amount before retrying request. This field is always approximate
+     * and does not guarantee the presence of a key. It can take values
+     * from 1.0 to 300.0. QKD clients can ignore this value and always execute
+     * queries with a fixed delay.
+     * Время, через которое можно повторить запрос. Это поле всегда имеет
+     * приблизительное значение и не гарантирует наличие ключа. Может принимать
+     * значения от 1.0 до 300.0. Клиенты QKD могут игнорировать это значение и
+     * всегда выполнять запросы с фиксированной задержкой.
      */
     2: double retry_after,
 
